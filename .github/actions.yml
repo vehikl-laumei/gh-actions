@@ -1,21 +1,44 @@
-name: PR Template Reminder
+name: Update PR Description
+
 on:
   pull_request:
-    types: [opened]
+    types: [opened, synchronize]
 
 jobs:
-  remind-template:
+  update-pr-description:
     runs-on: ubuntu-latest
     if: startsWith(github.head_ref, 'release/')
     steps:
-      - name: Comment on PR
-        uses: actions/github-script@v0.9.0
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: 'Reminder: For release branches, please use the [release PR template](https://github.com/[owner]/[repo]/compare/[branch]?template=release_pr_template.md).'
-            })
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Update PR description
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const { context } = require("@actions/github");
+
+          // Get list of commits in the PR
+          const pull_number = context.payload.pull_request.number;
+          const owner = context.repo.owner;
+          const repo = context.repo.repo;
+
+          const listCommitsResponse = await github.rest.pulls.listCommits({
+            owner,
+            repo,
+            pull_number,
+          });
+
+          const commits = listCommitsResponse.data.map(commit => commit.commit.message);
+
+          // Construct new PR description
+          let newDescription = '### Commits in this PR:\n';
+          newDescription += commits.join('\n');
+
+          // Update the PR description
+          await github.rest.pulls.update({
+            owner,
+            repo,
+            pull_number,
+            body: newDescription,
+          });
