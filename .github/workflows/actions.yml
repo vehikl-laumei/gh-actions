@@ -16,4 +16,4 @@ jobs:
       uses: actions/github-script@v5
       with:
         github-token: ${{ secrets.TOKEN }}
-        script: '../script.js'
+        script-path: .github/script.js
