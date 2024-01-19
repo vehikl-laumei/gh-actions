@@ -21,17 +21,14 @@ jobs:
           function formatCommitMessage(commitMessage) {
             const teamTicketRegex = /^\[([A-Z]+-\d+)\]/;
             const prNumberRegex = /#(\d+)$/;
-            const commitTitleRegex = /^\[[A-Z]+-\d+\]\s+(.*?)(?:\s+#\d+)?$/;
 
             const teamTicketMatch = commitMessage.match(teamTicketRegex);
             const prNumberMatch = commitMessage.match(prNumberRegex);
-            const commitTitleMatch = commitMessage.match(commitTitleRegex);
 
             const teamTicket = teamTicketMatch ? teamTicketMatch[1] : 'Unknown';
             const prNumber = prNumberMatch ? prNumberMatch[1] : 'Unknown';
-            const commitTitle = commitTitleMatch ? commitTitleMatch[1] : 'Commit Title Unknown';
 
-            return `[[${teamTicket}](https://vshred.atlassian.net/browse/${teamTicket})]: ${commitTitle} ([#${prNumber}](https://github.com/VinsanityShred/laravel-ecommerce/pull/${prNumber}))`;
+            return `[[${teamTicket}](https://vshred.atlassian.net/browse/${teamTicket})]: ${commitMessage} ([#${prNumber}](https://github.com/VinsanityShred/laravel-ecommerce/pull/${prNumber}))`;
           }
 
           // Get list of commits in the PR
@@ -46,7 +43,10 @@ jobs:
           });
 
           const formattedCommits = listCommitsResponse.data.map(commit => formatCommitMessage(commit.commit.message));
-          const newDescription += formattedCommits.join('\n');
+
+          // Construct new PR description
+          let newDescription = '### Commits in this PR:\n';
+          newDescription += formattedCommits.join('\n');
 
           // Update the PR description
           await github.rest.pulls.update({
@@ -55,4 +55,3 @@ jobs:
             pull_number,
             body: newDescription,
           });
-
