@@ -15,6 +15,7 @@ jobs:
     - name: Update PR description
       uses: actions/github-script@v5
       with:
+        github-token: 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
         script: |
           // Get list of commits in the PR
           const pull_number = context.payload.pull_request.number;
