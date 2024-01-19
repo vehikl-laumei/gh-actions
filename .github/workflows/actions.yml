@@ -57,7 +57,7 @@ jobs:
             .filter(Boolean); // Filter out null values
 
           // Construct new PR description only if there are formatted commits
-          let newDescription = formattedCommits.length > 0 ? '### Commits in this PR:\n' + formattedCommits.join('\n') : '';
+          let newDescription = formattedCommits.length > 0 && formattedCommits.join('\n');
 
           // Update the PR description if necessary
           if (newDescription) {
