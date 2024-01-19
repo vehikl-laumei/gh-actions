@@ -43,10 +43,7 @@ jobs:
           });
 
           const formattedCommits = listCommitsResponse.data.map(commit => formatCommitMessage(commit.commit.message));
-
-          // Construct new PR description
-          let newDescription = '### Commits in this PR:\n';
-          newDescription += formattedCommits.join('\n');
+          const newDescription += formattedCommits.join('\n');
 
           // Update the PR description
           await github.rest.pulls.update({
