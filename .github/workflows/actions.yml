@@ -17,5 +17,5 @@ jobs:
       with:
         github-token: ${{ secrets.TOKEN }}
         script: |
-          const script = require('./.github/workflows/script.js');
+          const script = require('./.github/script.js');
           await script({github, context, core})
