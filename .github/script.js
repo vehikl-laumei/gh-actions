@@ -1,3 +1,5 @@
+const { parse, format, getYear } = require('date-fns');
+
 function formatCommitMessage(commitMessage) {
   const commitMessageRegex = /\[[A-Za-z]+-\d+] .+ \(#\d+\)/;
 
@@ -26,6 +28,17 @@ function formatCommitMessage(commitMessage) {
   return `[[${uppercaseTeamTicket}](https://vshred.atlassian.net/browse/${uppercaseTeamTicket})]: ${trimmedCommitMessage} ([#${prNumber}](https://github.com/VinsanityShred/laravel-ecommerce/pull/${prNumber}))`;
 }
 
+function formatReleaseBranch(branchName) {
+  const parts = branchName.split('-');
+  const datePart = `${parts[1]}-${parts[2]}`;
+  const title = parts[3].charAt(0).toUpperCase() + parts[3].slice(1);
+
+  const parsedDate = parse(datePart, 'MMM-dd', new Date());
+  const formattedDate = format(parsedDate, 'MMMM do');
+
+  return `${title} Release: ${formattedDate}, ${getYear(new Date())}`
+}
+
 module.exports = async ({
   github,
   context,
@@ -52,6 +65,7 @@ module.exports = async ({
       owner,
       repo,
       pull_number,
+      title: formatReleaseBranch(context.payload.pull_request.head.ref),
       body: newDescription,
     });
   }

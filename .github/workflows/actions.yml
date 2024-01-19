@@ -9,13 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.head_ref, 'release/')
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Update PR description
-      uses: actions/github-script@v5
-      with:
-        github-token: ${{ secrets.TOKEN }}
-        script: |
-          const script = require('./.github/script.js');
-          await script({github, context, core})
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update PR Title & Description
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.TOKEN }}
+          script: |
+            const script = require('./.github/script.js');
+            await script({github, context, core})
