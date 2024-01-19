@@ -1,4 +1,4 @@
-module.exports = async ({ github, context }) => {
+module.exports = async ({ github, context, core }) => {
   // Function to format commit message
   function formatCommitMessage(commitMessage) {
     const teamTicketRegex = /^\[([A-Z]+-\d+)\]/;
