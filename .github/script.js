@@ -29,11 +29,11 @@ function formatCommitMessage(commitMessage) {
 }
 
 function formatReleaseBranch(branchName) {
+  const [partialDate] = branchName.match(/([a-z]{3}-\d{2})/)
   const parts = branchName.split('-');
-  const datePart = `${parts[1]}-${parts[2]}`;
-  const title = parts[3].charAt(0).toUpperCase() + parts[3].slice(1);
 
-  const parsedDate = parse(datePart, 'MMM-dd', new Date());
+  const title = parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
+  const parsedDate = parse(partialDate, 'MMM-dd', new Date());
   const formattedDate = format(parsedDate, 'MMMM do');
 
   return `${title} Release: ${formattedDate}, ${getYear(new Date())}`
