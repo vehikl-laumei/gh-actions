@@ -16,8 +16,6 @@ jobs:
       uses: actions/github-script@v5
       with:
         script: |
-          const { context } = require("@actions/github");
-
           // Get list of commits in the PR
           const pull_number = context.payload.pull_request.number;
           const owner = context.repo.owner;
