@@ -25,14 +25,10 @@ jobs:
             const teamTicketMatch = commitMessage.match(teamTicketRegex);
             const prNumberMatch = commitMessage.match(prNumberRegex);
 
-            if (teamTicketMatch && prNumberMatch) {
-              const teamTicket = teamTicketMatch[1];
-              const prNumber = prNumberMatch[1];
+            const teamTicket = teamTicketMatch ? teamTicketMatch[1] : 'Unknown';
+            const prNumber = prNumberMatch ? prNumberMatch[1] : 'Unknown';
 
-              return `[[${teamTicket}](https://vshred.atlassian.net/browse/${teamTicket})]: ${commitMessage} ([#${prNumber}](https://github.com/VinsanityShred/laravel-ecommerce/pull/${prNumber}))`;
-            }
-
-            return null;
+            return `[[${teamTicket}](https://vshred.atlassian.net/browse/${teamTicket})]: ${commitMessage} ([#${prNumber}](https://github.com/VinsanityShred/laravel-ecommerce/pull/${prNumber}))`;
           }
 
           // Get list of commits in the PR
@@ -46,9 +42,7 @@ jobs:
             pull_number,
           });
 
-          const formattedCommits = listCommitsResponse.data
-            .map(commit => formatCommitMessage(commit.commit.message))
-            .filter(Boolean); // Filter out null values
+          const formattedCommits = listCommitsResponse.data.map(commit => formatCommitMessage(commit.commit.message));
 
           // Construct new PR description
           let newDescription = '### Commits in this PR:\n';
