@@ -19,16 +19,25 @@ jobs:
         script: |
           // Function to format commit message
           function formatCommitMessage(commitMessage) {
-            const teamTicketRegex = /^\[([A-Z]+-\d+)\]/;
-            const prNumberRegex = /#(\d+)$/;
+            const jiraIssueRegex = /^\[([A-Z]+-\d+)\]\s+/;
+            const prNumberRegex = /\(#(\d+)\)$/;
 
-            const teamTicketMatch = commitMessage.match(teamTicketRegex);
+            // Check if the commit message ends with a PR number
+            if (!prNumberRegex.test(commitMessage)) {
+              return null;
+            }
+
+            // Extract the PR number
             const prNumberMatch = commitMessage.match(prNumberRegex);
+            const prNumber = prNumberMatch[1];
 
-            const teamTicket = teamTicketMatch ? teamTicketMatch[1] : 'Unknown';
-            const prNumber = prNumberMatch ? prNumberMatch[1] : 'Unknown';
+            // Remove the JIRA issue key and PR number from the commit message
+            let cleanCommitMessage = commitMessage.replace(jiraIssueRegex, '').replace(prNumberRegex, '');
 
-            return `[[${teamTicket}](https://vshred.atlassian.net/browse/${teamTicket})]: ${commitMessage} ([#${prNumber}](https://github.com/VinsanityShred/laravel-ecommerce/pull/${prNumber}))`;
+            // Construct the formatted commit message
+            const formattedMessage = `[${cleanCommitMessage.trim()}](https://github.com/VinsanityShred/laravel-ecommerce/pull/${prNumber})`;
+
+            return formattedMessage;
           }
 
           // Get list of commits in the PR
@@ -42,13 +51,20 @@ jobs:
             pull_number,
           });
 
-          const formattedCommits = listCommitsResponse.data.map(commit => formatCommitMessage(commit.commit.message));
-          const newDescription = formattedCommits.join('\n');
-          
-          // Update the PR description
-          await github.rest.pulls.update({
-            owner,
-            repo,
-            pull_number,
-            body: newDescription,
-          });
+          // Filter and format commits
+          const formattedCommits = listCommitsResponse.data
+            .map(commit => formatCommitMessage(commit.commit.message))
+            .filter(Boolean); // Filter out null values
+
+          // Construct new PR description only if there are formatted commits
+          let newDescription = formattedCommits.length > 0 ? '### Commits in this PR:\n' + formattedCommits.join('\n') : '';
+
+          // Update the PR description if necessary
+          if (newDescription) {
+            await github.rest.pulls.update({
+              owner,
+              repo,
+              pull_number,
+              body: newDescription,
+            });
+          }
